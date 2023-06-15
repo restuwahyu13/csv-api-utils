@@ -7,16 +7,16 @@ type CSVPayload struct {
 }
 
 type StructInput struct {
-	Index            string
-	CustomerId       string
-	FirstName        string
-	LastName         string
-	Company          string
-	City             string
-	Country          string
-	Phone1           string
-	Phone2           string
-	Email            string
-	SubscriptionDate string
-	Website          string
+	Index            string `csv:"Index"`
+	CustomerId       string `csv:"CustomerId"`
+	FirstName        string `csv:"FirstName"`
+	LastName         string `csv:"LastName"`
+	Company          string `csv:"Company"`
+	City             string `csv:"City"`
+	Country          string `csv:"Country"`
+	Phone1           string `csv:"Phone1"`
+	Phone2           string `csv:"Phone2"`
+	Email            string `csv:"Email"`
+	SubscriptionDate string `csv:"SubscriptionDate"`
+	Website          string `csv:"Website"`
 }

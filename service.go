@@ -86,6 +86,8 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 		mutex.Lock()
 		headers = append(headers, metadata...)
 		mutex.Unlock()
+
+		break
 	}
 
 	/*
@@ -102,7 +104,7 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 		}
 
 		reader := csv.NewReader(bytes.NewReader(r))
-		decoder, err := csvutil.NewDecoder(reader, headers...)
+		decoder, err := csvutil.NewDecoder(reader)
 
 		if err != nil {
 			defer log.Println(err)

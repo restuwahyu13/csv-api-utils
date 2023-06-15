@@ -36,7 +36,7 @@ func main() {
 
 func HttpRouter(r *chi.Mux, handler InterfaceHandler) {
 	r.Get("/", handler.Ping)
-	r.Post("/merge", handler.Generate)
+	r.Post("/merge", handler.Merge)
 }
 
 func HttpServer(r *chi.Mux) {
