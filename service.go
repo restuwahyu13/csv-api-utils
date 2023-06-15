@@ -35,7 +35,6 @@ func NewService() InterfaceService {
 func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 	var (
 		poolSize int           = 5000
-		headers  []string      = []string{}
 		contents []StructInput = []StructInput{}
 		content  StructInput   = StructInput{}
 		mutex    *sync.RWMutex = &sync.RWMutex{}
@@ -58,36 +57,6 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 
 	if filesLength <= 0 {
 		return nil, errors.New("CSV file not found")
-	}
-
-	csvFiles := files[0:1]
-
-	/*
-	* ================================
-	* GET CSV FILES HEADERS
-	* ================================
-	 */
-
-	for _, v := range csvFiles {
-		r, err := fs.ReadFile(dir, v)
-		if err != nil {
-			defer log.Println(err)
-			return nil, err
-		}
-
-		reader := csv.NewReader(bytes.NewReader(r))
-		metadata, err := reader.Read()
-
-		if err != nil {
-			defer log.Println(err)
-			return nil, err
-		}
-
-		mutex.Lock()
-		headers = append(headers, metadata...)
-		mutex.Unlock()
-
-		break
 	}
 
 	/*
