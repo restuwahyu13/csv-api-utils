@@ -1,4 +1,4 @@
-## Sample Request Body Merge CSV File
+## Sample Request Body
 
 ```json
 {
