@@ -52,11 +52,11 @@ func (h *StructHandler) Merge(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, err := h.service.Merge(&req)
+	_, err := h.service.Merge(&req)
 	if err != nil {
 		APIResponse(rw, &ApiResponse{StatCode: http.StatusUnprocessableEntity, ErrMessage: err.Error()})
 		return
 	}
 
-	APIResponse(rw, &ApiResponse{StatCode: http.StatusOK, StatMessage: fmt.Sprintf("CSV file output location: %s", req.OutputDir), Data: service})
+	APIResponse(rw, &ApiResponse{StatCode: http.StatusOK, StatMessage: fmt.Sprintf("CSV file output location: %s", req.OutputDir)})
 }

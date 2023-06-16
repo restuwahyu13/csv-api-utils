@@ -5,14 +5,12 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/jszwec/csvutil"
 	"github.com/panjf2000/ants/v2"
 )
 
@@ -35,8 +33,7 @@ func NewService() InterfaceService {
 func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 	var (
 		poolSize int           = 5000
-		contents []StructInput = []StructInput{}
-		content  StructInput   = StructInput{}
+		headers  []string      = []string{}
 		mutex    *sync.RWMutex = &sync.RWMutex{}
 		dir      fs.FS         = os.DirFS(req.InputDir)
 	)
@@ -59,39 +56,22 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 		return nil, errors.New("CSV file not found")
 	}
 
-	/*
-	* ================================
-	* GET CSV FILES WITH HEADERS
-	* ================================
-	 */
-
 	for _, v := range files[0:1] {
 		r, err := fs.ReadFile(dir, v)
 		if err != nil {
-			defer log.Println(err)
-			return nil, err
+			log.Fatal(err.Error())
 		}
 
 		reader := csv.NewReader(bytes.NewReader(r))
-		decoder, err := csvutil.NewDecoder(reader)
+		metadata, err := reader.Read()
 
 		if err != nil {
-			defer log.Println(err)
-			return nil, err
+			log.Fatal(err.Error())
 		}
 
-		for {
-			if err := decoder.Decode(&content); err == io.EOF {
-				break
-			} else if err != nil {
-				defer log.Println(err)
-				return nil, err
-			}
-
-			mutex.Lock()
-			contents = append(contents, content)
-			mutex.Unlock()
-		}
+		mutex.Lock()
+		headers = append(headers, metadata...)
+		mutex.Unlock()
 	}
 
 	/*
@@ -100,47 +80,22 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 	* ================================
 	 */
 
-	for _, v := range files[1:filesLength] {
+	contents := [][]string{headers}
+
+	for _, v := range files {
 		r, err := fs.ReadFile(dir, v)
 		if err != nil {
-			defer log.Println(err)
-			return nil, err
+			log.Fatal(err.Error())
 		}
 
 		reader := csv.NewReader(bytes.NewReader(r))
-		decoder, err := csvutil.NewDecoder(reader)
+		records, _ := reader.ReadAll()
 
-		if err != nil {
-			defer log.Println(err)
-			return nil, err
-		}
-
-		for {
-			if err := decoder.Decode(&content); err == io.EOF {
-				break
-			} else if err != nil {
-				defer log.Println(err)
-				return nil, err
-			}
-
+		for _, v := range records[1:] {
 			mutex.Lock()
-			contents = append(contents, content)
+			contents = append(contents, v)
 			mutex.Unlock()
 		}
-	}
-
-	contentsByte, err := csvutil.Marshal(&contents)
-	if err != nil {
-		defer log.Println(err)
-		return nil, err
-	}
-
-	reader := csv.NewReader(bytes.NewReader(contentsByte))
-	csvData, err := reader.ReadAll()
-
-	if err != nil {
-		defer log.Println(err)
-		return nil, err
 	}
 
 	/*
@@ -173,10 +128,10 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 		}()
 	})
 
-	if err := pool.Invoke(csvData); err != nil {
+	if err := pool.Invoke(contents); err != nil {
 		return nil, err
 	}
 
 	defer pool.Release()
-	return csvData, nil
+	return contents, nil
 }
