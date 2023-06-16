@@ -40,7 +40,7 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 
 	/*
 	* ================================
-	* GET CSV FILES
+	* GET CSV FILES HEADERS
 	* ================================
 	 */
 
