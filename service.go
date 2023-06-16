@@ -58,15 +58,18 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 
 	for _, v := range files[0:1] {
 		r, err := fs.ReadFile(dir, v)
+
 		if err != nil {
-			log.Fatal(err.Error())
+			defer log.Println(err.Error())
+			return nil, err
 		}
 
 		reader := csv.NewReader(bytes.NewReader(r))
 		metadata, err := reader.Read()
 
 		if err != nil {
-			log.Fatal(err.Error())
+			defer log.Println(err.Error())
+			return nil, err
 		}
 
 		mutex.Lock()
@@ -84,12 +87,18 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 
 	for _, v := range files {
 		r, err := fs.ReadFile(dir, v)
+
 		if err != nil {
-			log.Fatal(err.Error())
+			defer log.Println(err.Error())
+			return nil, err
 		}
 
 		reader := csv.NewReader(bytes.NewReader(r))
-		records, _ := reader.ReadAll()
+		records, err := reader.ReadAll()
+
+		if err != nil {
+			return nil, err
+		}
 
 		for _, v := range records[1:] {
 			mutex.Lock()
@@ -129,6 +138,7 @@ func (s *StructService) Merge(req *CSVPayload) ([][]string, error) {
 	})
 
 	if err := pool.Invoke(contents); err != nil {
+		defer log.Println(err.Error())
 		return nil, err
 	}
 
