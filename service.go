@@ -201,8 +201,10 @@ func (s *StructService) Split(req *CSVSplitPayload) ([][]string, error) {
 	* ================================
 	 */
 
-	for j := 1; j <= csvLength; j++ {
-		csvIndex = append(csvIndex, j)
+	for i := 1; i <= csvLength; i++ {
+		mutex.Lock()
+		csvIndex = append(csvIndex, i)
+		mutex.Unlock()
 	}
 
 	for i := 0; i < len(csvIndex); i += csvChunkSize {
