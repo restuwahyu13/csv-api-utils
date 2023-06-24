@@ -32,11 +32,13 @@ func main() {
 
 	HttpRouter(r, handler)
 	HttpServer(r)
+
 }
 
 func HttpRouter(r *chi.Mux, handler InterfaceHandler) {
 	r.Get("/", handler.Ping)
 	r.Post("/merge", handler.Merge)
+	r.Post("/split", handler.Split)
 }
 
 func HttpServer(r *chi.Mux) {
